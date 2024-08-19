@@ -9,12 +9,31 @@
             "title": "Input/output options",
             "type": "object",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["out_dir"],
+            "required": ["input", "out_dir"],
             "properties": {
+                "input": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
+                    "schema": "assets/input_schema.json",
+                    "description": "Path to comma-separated file containing information about the samples you would like to analyse."
+                },
+                "save_fastp": {
+                    "type": "boolean",
+                    "description": "Save fastp trimmed fastq.",
+                    "default": false
+                },
+                "skip_primary": {
+                    "type": "boolean",
+                    "description": "Skip primary analysis",
+                    "default": false
+                },
                 "out_dir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "The output directory where the results will be saved.",
+                    "exists": false,
+                    "description": "The output directory where the results will be saved (must not already exist).",
                     "default": "out_dir"
                 },
                 "publish_dir_mode": {
@@ -24,11 +43,94 @@
                 }
             }
         },
+        "fastp_options": {
+            "title": "fastp options for Primary analysis",
+            "type": "object",
+            "description": "Options for the fastp software.",
+            "properties": {
+                "trim_poly_g": {
+                    "type": "boolean",
+                    "description": "Enable polyG tail trimming.",
+                    "default": true
+                },
+                "trim_poly_x": {
+                    "type": "boolean",
+                    "description": "Enable polyX tail trimming.",
+                    "default": true
+                },
+                "min_avg_qual": {
+                    "type": "integer",
+                    "description": "Minimum average quality to keep a read.",
+                    "default": 28
+                },
+                "min_len": {
+                    "type": "integer",
+                    "description": "Minimum length to keep a read.",
+                    "default": 41
+                },
+                "cut_right_window_size": {
+                    "type": "integer",
+                    "description": "The window size for sliding window trimming on the right.",
+                    "default": 4
+                },
+                "cut_right_mean_qual": {
+                    "type": "integer",
+                    "description": "The mean quality requirement for sliding window trimming on the right.",
+                    "default": 20
+                },
+                "cut_tail_window_size": {
+                    "type": "integer",
+                    "description": "The window size for sliding window trimming on the tail.",
+                    "default": 4
+                },
+                "cut_tail_mean_qual": {
+                    "type": "integer",
+                    "description": "The mean quality requirement for sliding window trimming on the tail.",
+                    "default": 25
+                }
+            }
+        },
+        "primary_opts": {
+            "title": "Options relative to Primary analysis",
+            "type": "object",
+            "description": "Options for Primary analysis",
+            "properties": {
+                "kraken2_db": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "exists": true, 
+                    "description": "Kraken2 index as a directory"
+                },
+                "num_reads_sample_qc": {
+                    "type": "integer",
+                    "default": 500000,
+                    "description": "Number of reads to subsample before kraken2 and fastqc"
+                }
+            }
+        },
+        "denovo_assembly": {
+            "title": "denovo assembly",
+            "type": "object",
+            "description": "Options for the denovo assembly of interest genome",
+            "properties": {
+                "abacas_MUMmer_program": {
+                    "type": "string",
+                    "default": "nucmer",
+                    "options": ["nucmer", "promer"],
+                    "description": "ABACAS - The MUMmer program used by ABACAS for alignment. Available options: 'nucmer' or 'promer'."
+                },
+                "abacas_keep_on_output": {
+                    "type": "string",
+                    "default": "scaffold",
+                    "options": ["scaffold", "include_act_files", "include_extended_act_files", "all"],
+                    "description": "ABACAS - File types to be kept in ABACAS output. Available options: 'scaffold', 'include_act_files', 'include_extended_act_files', or 'all'."
+                }
+            }
+        },
         "resources_options": {
             "title": "Resources options",
             "type": "object",
             "description": "Define The default resources for nextflow",
-            "required": ["input_dir", "out_dir"],
             "properties": {
                 "ncpus_low": {
                     "type": "integer",
@@ -44,16 +146,25 @@
                     "type": "integer",
                     "default": 16,
                     "description": "Number of cpu for high process."
+                },
+                "mem_high": {
+                    "type": "string",
+                    "default": "28.GB",
+                    "description": "Memory for high process. (eg. SPAdes)"
+                },
+                "kraken2_memory": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Amount of memory in GB for Kraken2, default is 12 GB"
                 }
             }
         }
     },
     "allOf": [
-        {
-            "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/resources_options"
-        }
+        { "$ref": "#/definitions/input_output_options" },
+        { "$ref": "#/definitions/denovo_assembly" },
+        { "$ref": "#/definitions/resources_options" }
     ]
 }
+
+
