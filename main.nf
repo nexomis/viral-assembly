@@ -61,7 +61,8 @@ def make_spades_args(meta) {
 // include
 include {SPRING_DECOMPRESS} from './modules/process/spring/decompress/main.nf'
 include {PRIMARY_FROM_READS} from './modules/subworkflows/primary/from_reads/main.nf'
-include {SPADES_ABACAS} from './modules/subworkflows/assembly/spades_abacas/main.nf'
+include {KRAKEN2_BUILD} from './modules/process/kraken2/kraken2-build/main.nf'
+include {VIRAL_ASSEMBLY} from './modules/subworkflows/assembly/viral_assembly/main.nf'
 
 workflow {
   // START PARSING SAMPLE SHEET
@@ -105,9 +106,24 @@ workflow {
   }
   // END PRIMARY
 
-  // START ASSEMBLY:SPADES_ABACAS
+
+  // START ASSEMBLY:KRAKEN2_BUILD_CUSTOM_DB
+  if (!params.skip_host_filtering) {
+    krakenLibrary = Channel.value(params.kraken2_db_library)    // ok is null ?
+
+    krakenBuildDb = KRAKEN2_BUILD(, krakenLibrary)
+    krakenDb = krakenBuildDb.out.db
+  } else {
+    krakenDb = null
+  }
+  
+  // END ASSEMBLY:KRAKEN2_BUILD_CUSTOM_DB
+
+
+  // START ASSEMBLY:KRAKEN2_SPADES_ABACAS
 
   //// reads channel format: update meta
+  // TODO: match between 'meta.kraken_db_id of' and 'meta.id' of krakenDb ?!
   trimmedInputs
   | map {
     it[0].spades_args = make_spades_args(it[0])
@@ -115,20 +131,7 @@ workflow {
   }
   | set {inputsForSpadesAbacas}
   
-  //// make abacas argument as channel
-  if (params.abacas_MUMmer_program == "nucmer" || params.abacas_MUMmer_program == "promer") {
-    abacas_MUMmer_program = params.abacas_MUMmer_program
-  } else {
-    abacas_MUMmer_program = "nucmer"
-    println "Unknown value of 'abacas_MUMmer_program': '${params.abacas_MUMmer_program}'. Replaced by 'nucmer' value."
-  }
-
-  abacas_keep_on_output = params.abacas_keep_on_output ?: 'scaffold'
-
-  abacasMUMmerProgram = Channel.value(abacas_MUMmer_program)
-  abacasKeepOnOutput = Channel.value(abacas_keep_on_output)
-
-  SPADES_ABACAS(inputsForSpadesAbacas, abacasMUMmerProgram, abacasKeepOnOutput)
+  SPADES_ABACAS(inputsForSpadesAbacas, krakenDb)   
   // END ASSEMBLY:SPADES_ABACAS
 
 }
