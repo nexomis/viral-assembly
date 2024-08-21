@@ -120,7 +120,7 @@ workflow {
   // END ASSEMBLY:KRAKEN2_BUILD_CUSTOM_DB
 
 
-  // START ASSEMBLY:KRAKEN2_SPADES_ABACAS
+  // START ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
 
   //// reads channel format: update meta
   // TODO: match between 'meta.kraken_db_id of' and 'meta.id' of krakenDb ?!
@@ -131,7 +131,7 @@ workflow {
   }
   | set {inputsForSpadesAbacas}
   
-  SPADES_ABACAS(inputsForSpadesAbacas, krakenDb)   
-  // END ASSEMBLY:SPADES_ABACAS
+  VIRAL_ASSEMBLY(inputsForSpadesAbacas, krakenDb)   
+  // END ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
 
 }
