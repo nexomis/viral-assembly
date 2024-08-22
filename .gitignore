@@ -1,8 +1,5 @@
-/work
+/data/test/
+/work/
 .nextflow*
-/data/test/out_dir
-/data/test/fq
-/data/test/genome_ref
-/data/test/samplesheet.csv
-/out_dir
-/.nextflow
+/out_dir/
+/.nextflow/

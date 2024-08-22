@@ -37,12 +37,12 @@
           "type": "string",
           "pattern": "^\\S+\\.(fasta|fa|fna)(\\.)?(gz|z|bz|bzip2)?$",
           "format": "file-path",
-          "errorMessage": "Path for fasta genome reference must be provided, cannot contain spaces and must end with .fasta, .fa, .fna optionally followed by .gz (or .z, .bz or .bzip2)"
+          "errorMessage": "Path for fasta genome reference must be provided, cannot contain spaces and must end with .fasta, .fa, .fna optionally followed by .gz (or .z, .bz or .bzip2) [recquired if not 'skip_abacas']"
         },
-        "taxid_host_genome": {
-          "type": "number",
-          "default" : -1,
-          "errorMessage": "Taxid of host organism in order to remore reads from host genome/transcriptome."
+        "host_kraken_db": {
+          "pattern": "^.*$",
+          "format": "dir-path",
+          "errorMessage": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. [recquired if not 'skip_host_filtering']"
         },
         "assembly_type":  {
           "type": "string",

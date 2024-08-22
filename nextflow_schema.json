@@ -6,7 +6,7 @@
     "type": "object",
     "definitions": {
         "input_output_options": {
-            "title": "Input/output options",
+            "title": "input/output",
             "type": "object",
             "description": "Define where the pipeline should find input data and save output data.",
             "required": ["input", "out_dir"],
@@ -24,11 +24,6 @@
                     "description": "Save fastp trimmed fastq.",
                     "default": false
                 },
-                "skip_primary": {
-                    "type": "boolean",
-                    "description": "Skip primary analysis",
-                    "default": false
-                },
                 "out_dir": {
                     "type": "string",
                     "format": "directory-path",
@@ -43,8 +38,47 @@
                 }
             }
         },
+        "global_worflow": {
+            "title": "global workflow",
+            "type": "object",
+            "description": "Options for global worflow",
+            "properties": {
+
+                
+                "biocontainers_registry": {
+                    "type": "string",
+                    "description": "Biocontaners registry of docker images. Note: Does not applied to every containers process"
+                },
+
+                "skip_primary": {
+                    "type": "boolean",
+                    "description": "Skip primary analysis",
+                    "default": false
+                },
+                "skip_host_filtering": {
+                    "type": "boolean",
+                    "description": "Skip host reads removing (using kraken)",
+                    "default": false
+                },
+                "skip_abacas": {
+                    "type": "boolean",
+                    "description": "Skip abacas (scaffolding). Not recommended: may lead to ambiguous results due to the probable redundancy of the raw scaffolds obtained from spades.",
+                    "default": false
+                },
+                "skip_bowtie2": {
+                    "type": "boolean",
+                    "description": "Skip bowtie2 (index build and mapping)",
+                    "default": false
+                },
+                "skip_quast": {
+                    "type": "boolean",
+                    "description": "Skip quast QC",
+                    "default": false
+                }
+            }
+        },
         "fastp_options": {
-            "title": "fastp options for Primary analysis",
+            "title": "fastp (primary analysis)",
             "type": "object",
             "description": "Options for the fastp software.",
             "properties": {
@@ -91,7 +125,7 @@
             }
         },
         "primary_opts": {
-            "title": "Options relative to Primary analysis",
+            "title": "primary analysis",
             "type": "object",
             "description": "Options for Primary analysis",
             "properties": {
@@ -118,13 +152,19 @@
                     "default": "nucmer",
                     "options": ["nucmer", "promer"],
                     "description": "ABACAS - The MUMmer program used by ABACAS for alignment. Available options: 'nucmer' or 'promer'."
-                },
-                "abacas_keep_on_output": {
-                    "type": "string",
-                    "default": "scaffold",
-                    "options": ["scaffold", "include_act_files", "include_extended_act_files", "all"],
-                    "description": "ABACAS - File types to be kept in ABACAS output. Available options: 'scaffold', 'include_act_files', 'include_extended_act_files', or 'all'."
                 }
+            }
+        },
+        "mapping_on_assembled": {
+            "title": "mapping on assembled",
+            "type": "object",
+            "description": "Options for the filtered reads (trimming + host filtering) on assembly scaffolds",
+            "properties": {
+                "bowtie2_mode": {
+                    "type": "string",
+                    "default": "end-to-end",
+                    "description": "Bowtie2 mapping mode ('end-to-end', 'local', 'very-fast', 'very-sensitive-local', ...)"
+                },
             }
         },
         "resources_options": {
@@ -163,6 +203,7 @@
     "allOf": [
         { "$ref": "#/definitions/input_output_options" },
         { "$ref": "#/definitions/denovo_assembly" },
+        { "$ref": "#/definitions/mapping_on_assembled" },
         { "$ref": "#/definitions/resources_options" }
     ]
 }
