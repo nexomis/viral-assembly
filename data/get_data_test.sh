@@ -24,15 +24,7 @@ host_kraken_db_s1="/path/to/host_kraken_db/s1/"
 host_kraken_db_s2="/path/to/host_kraken_db/s2/"
 echo -e "\
 sample_name,path_fq_R1,path_fq_R2,path_ref_genome,host_kraken_db,assembly_type\n\
-s1,data/test/fq/SRR10903401_1.fastq.gz,data/test/fq/SRR10903401_2.fastq.gz,data/test/genome_ref/sars_cov2_wuhan_refseq.fa,${host_kraken_db_s1},corona\n\
-s2,data/test/fq/s2_R1.fq.gz,data/test/fq/s2_R2.fq.gz,data/test/genome_ref/vrl_genome_ref_s2.fa,${host_kraken_db_s2},rnaviral\
+s1,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,test/genome_ref/sars_cov2_wuhan_refseq.fa,${host_kraken_db_s1},corona\n\
+s2,test/fq/s2_R1.fq.gz,test/fq/s2_R2.fq.gz,test/genome_ref/vrl_genome_ref_s2.fa,${host_kraken_db_s2},rnaviral\
 " > test/samplesheet.csv
 
-# exec:
- git/viral-assembly$ NXF_VER=23.10.1 nextflow run main.nf \
-   -profile docker
-  --input data/test/samplesheet.csv \
-  --mem_high 10.GB \
-  --kraken2_db /path/to/kraken_db_qc/ \
-  --output_dir data/test/out_dir/
-  # --kraken2_memory
