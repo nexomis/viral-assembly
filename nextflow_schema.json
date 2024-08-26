@@ -190,12 +190,17 @@
                 "mem_high": {
                     "type": "string",
                     "default": "28.GB",
-                    "description": "Memory for high process. (eg. SPAdes)"
+                    "description": "Memory for high process (eg. 'samtools sort', 'bowtie2', ...)."
+                },
+                "spades_memory": {
+                    "type": "integer",
+                    "default": "28",
+                    "description": "Amount of memory in GB for SPAdes, default is '28' (GB)."
                 },
                 "kraken2_memory": {
                     "type": "integer",
                     "default": 10,
-                    "description": "Amount of memory in GB for Kraken2, default is 12 GB"
+                    "description": "Amount of memory in GB for Kraken2, default is 12 GB."
                 }
             }
         }

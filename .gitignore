@@ -3,3 +3,4 @@
 .nextflow*
 /out_dir/
 /.nextflow/
+note.txt
