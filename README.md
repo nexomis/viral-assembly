@@ -13,9 +13,12 @@ bash get_data_test.sh
 
 kraken_db_qc="/path/to/kraken/db/for/QC/"
 NXF_VER=23.10.1 nextflow run ../main.nf \
-  -profile docker
+  -profile docker \
   --input test/samplesheet.csv \
   --mem_high 8.GB \
-  --kraken2_db ${kraken_db_qc} \
+  --kraken2_db k2_viral_20240605 \
   --output_dir test/out_dir/
 ```
+
+
+

@@ -24,51 +24,40 @@ validateParameters()
 log.info paramsSummaryLog(workflow)
 
 file(params.out_dir + "/nextflow").mkdirs()
-
-def parse_sample_entry_wReadType(it) {  // sample_name,path_raw_R1,path_raw_R2,ref_genome,host_taxid,assembly_type(meta/viral/coronavirus)
-// replaced by 'parse_sample_entry()' because 'read_type' is defined here and on SPRING_DECOMPRESS process (called by PRIMARY_FROM_READS worflow) ... 
-  def meta = [ "id": it[0], "ref_genome": it[3], "host_txid": it[4], "assembly_type": it[5] ]
-  def r1_file = file(it[1])
-  if (it[2] == "") {
-    if (r1_file.getExtension() == "spring") {
-      meta.read_type = "spring"
-    } else {
-      meta.read_type = "SR"
-    }
-    return [meta, [r1_file] ]
-  } else {
-    def r2_file = file(it[2])
-    meta.read_type = "PE"
-    return [meta, [r1_file, r2_file] ]
-  }
-}
-
-def parse_sample_entry(it) {  // sample_name,path_raw_R1,path_raw_R2,ref_genome,host_kraken_db,assembly_type(meta/viral/coronavirus)
-  def meta = [ "id": it[0], "ref_genome": it[3], "host_kraken_db": it[4], "assembly_type": it[5] ]
-  def r1_file = file(it[1])
-  if (it[2] == "") {
-    return [meta, [r1_file] ]
-  } else {
-    def r2_file = file(it[2])
-    return [meta, [r1_file, r2_file] ]
-  }
+// groovy fonction within nextflow script
+def parse_sample_entry(it) {
+  def files = []
+  if (it[1] &&!it[1].isEmpty()) files << file(it[1], checkIfExists: true)
+  if (it[2] &&!it[2].isEmpty()) files << file(it[2], checkIfExists: true)
+  def genome_ref = it[3] &&!it[3].isEmpty()? file(it[3], checkIfExists: true) : null
+  def kraken2_db = it[4] &&!it[4].isEmpty()? file(it[4], checkIfExists: true) : null
+  def meta = [
+    "id": it[0],
+    "assembly_type": it[5],
+    "assembler": "spades",
+    "host_removal": kraken2_db? "yes" : "no",
+    "abacas": genome_ref? "yes" : "no",
+    "realign": "yes"
+  ]
+  return [meta, files, kraken2_db, genome_ref]
 }
 
 def make_spades_args(meta) {
-  spades_args = []
-  if (meta.assembly_type == "metaviral") {
-    spades_args << "--metaviral"
-  } else if (meta.assembly_type == "corona") {
-    spades_args << "--corona"
-  } else if (meta.assembly_type == "rnaviral") {
-    spades_args << "--rnaviral"
-  } else {
-    spades_args << "meta.assembly_type"
-    println "Unknown value of 'assembly_type': ${meta.assembly_type}. Argument integrated as is in the assembler command line!!!"
+  switch (meta.assembly_type) {
+    case "metaviral":
+      return "--metaviral"
+    case "corona":
+      return "--corona"
+    case "rnaviral":
+      return "--rnaviral"
+    default:
+      if (meta.assembler == "spades") {
+        error "Unknown value of 'assembly_type': ${meta.assembly_type}. Supported values are'metaviral', 'corona', and 'rnaviral'."
+      } else {
+        return null
+      }
   }
-  return spades_args.join(" ")
 }
-
   
 // include
 include {PRIMARY_FROM_READS} from './modules/subworkflows/primary/from_reads/main.nf'
@@ -81,11 +70,22 @@ workflow {
     return parse_sample_entry(it)
   }
   | set { rawInputs }
-  // END PARSING SAMPLE SHEET
+  
+  rawInputs
+  | map { [it[0], it[1]] }
+  | set {readsInputs}
+
+  rawInputs
+  | map { [it[0], it[2]] }
+  | set {k2Inputs}
+
+  rawInputs
+  | map { [it[0], it[3]] }
+  | set {refGenomeInputs}
 
   // START PRIMARY
   if (params.skip_primary) { // Note: skip_primary, include skiping spring_decompress step !!
-    rawInputs
+    readsInputs
     | map {
       if (it[1].size() == 1) {
         it[0].read_type = "SR"
@@ -99,13 +99,14 @@ workflow {
     if ( params.kraken2_db == null ) {
       error "kraken2_db argument required for primary analysis"
     }
+
     Channel.fromPath(params.kraken2_db, type: "dir", checkIfExists: true)
     | collect
     | set {dbPathKraken2}
     
-    PRIMARY_FROM_READS(rawInputs, dbPathKraken2)
-    
-    trimmedInputs = PRIMARY_FROM_READS.out.trimmed
+    PRIMARY_FROM_READS(readsInputs, dbPathKraken2)
+    PRIMARY_FROM_READS.out.trimmed
+    | set { trimmedInputs }
   }
   // END PRIMARY
 
@@ -116,12 +117,12 @@ workflow {
   // TODO: match between 'meta.kraken_db_id of' and 'meta.id' of krakenDb ?!
   trimmedInputs
   | map {
-    it[0].spades_args = make_spades_args(it[0])
+    it[0].args_spades = make_spades_args(it[0])
     return it
   }
   | set {trimmedInputsWithAssemblyArgs}
   
-  VIRAL_ASSEMBLY(trimmedInputsWithAssemblyArgs) 
+  VIRAL_ASSEMBLY(trimmedInputsWithAssemblyArgs, k2Inputs, refGenomeInputs)
   // END ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
 
 }

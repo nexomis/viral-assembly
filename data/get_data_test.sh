@@ -20,11 +20,26 @@ gunzip test/genome_ref/sars_cov2_wuhan_refseq.fa.gz
 cp test/genome_ref/sars_cov2_wuhan_refseq.fa test/genome_ref/vrl_genome_ref_s2.fa
 
 # samplesheet.csv
-host_kraken_db_s1="/path/to/host_kraken_db/s1/"
-host_kraken_db_s2="/path/to/host_kraken_db/s2/"
+host_kraken_db_s1="k2_HPRC_20230810/db"
+host_kraken_db_s2="k2_HPRC_20230810/db"
 echo -e "\
 sample_name,path_fq_R1,path_fq_R2,path_ref_genome,host_kraken_db,assembly_type\n\
 s1,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,test/genome_ref/sars_cov2_wuhan_refseq.fa,${host_kraken_db_s1},corona\n\
 s2,test/fq/s2_R1.fq.gz,test/fq/s2_R2.fq.gz,test/genome_ref/vrl_genome_ref_s2.fa,${host_kraken_db_s2},rnaviral\
 " > test/samplesheet.csv
+
+# dll kraken databases
+mkdir k2_HPRC_20230810
+cd k2_HPRC_20230810
+wget https://zenodo.org/records/8339732/files/k2_HPRC_20230810.tar.gz
+tar xvzf k2_HPRC_20230810.tar.gz
+rm k2_HPRC_20230810.tar.gz
+cd ..
+
+mkdir k2_viral_20240605
+cd k2_viral_20240605
+wget https://genome-idx.s3.amazonaws.com/kraken/k2_viral_20240605.tar.gz
+tar xvzf k2_viral_20240605.tar.gz
+rm k2_viral_20240605.tar.gz
+cd ..
 

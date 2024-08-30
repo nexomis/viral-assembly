@@ -4,3 +4,7 @@
 /out_dir/
 /.nextflow/
 note.txt
+/data/k2_viral*
+/data/out_dir
+/data/work
+/data/k2*
