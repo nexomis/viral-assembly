@@ -1,4 +1,6 @@
-/data/test/
+/data/test/fq
+/data/test/genome_ref
+/data/test/out_dir
 /work/
 .nextflow*
 /out_dir/

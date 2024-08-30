@@ -10,13 +10,14 @@
         "sample_name": {
           "type": "string",
           "pattern": "^[a-zA-Z0-9_]+$",
-          "errorMessage": "Sample name must contains only alphanumeric chars or underscore"
+          "uniqueItems": true,
+          "description": "Sample name must contains only alphanumeric chars or underscore"
         },
         "path_fq_R1": {
           "type": "string",
           "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|bz|bzip2)?$",
           "format": "file-path",
-          "errorMessage": "Path for R1 must be provided, cannot contain spaces and must end with .fastq, .fq, .spring optionally followed by .gz (or .z, .bz or .bzip2)"
+          "description": "Path for R1 must be provided, cannot contain spaces and must end with .fastq, .fq, .spring optionally followed by .gz (or .z, .bz or .bzip2)"
         },
         "path_fq_R2": {
           "anyOf": [
@@ -24,7 +25,7 @@
               "type": "string",
               "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|bz|bzip2)?$",
               "format": "file-path",
-              "errorMessage": "Path for R2, if provided, cannot contain spaces and must end with .fastq, .fq optionally followed by .gz (or .z, .bz or .bzip2)"
+              "description": "Path for R2, if provided, cannot contain spaces and must end with .fastq, .fq optionally followed by .gz (or .z, .bz or .bzip2)"
             },
             {
               "type": "string",
@@ -34,22 +35,36 @@
           "default": ""
         },
         "path_ref_genome": {
-          "type": "string",
-          "pattern": "^\\S+\\.(fasta|fa|fna)(\\.)?(gz|z|bz|bzip2)?$",
-          "format": "file-path",
-          "errorMessage": "Path for fasta genome reference must be provided, cannot contain spaces and must end with .fasta, .fa, .fna optionally followed by .gz (or .z, .bz or .bzip2) [recquired if not 'skip_abacas']"
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\S+\\.(fasta|fa|fna)(\\.)?(gz|z|bz|bzip2)?$",
+              "format": "file-path",
+              "description": "Path for fasta genome reference must be provided, cannot contain spaces and must end with .fasta, .fa, .fna optionally followed by .gz (or .z, .bz or .bzip2) [recquired if not 'skip_abacas']"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ],
+          "default": ""
         },
         "host_kraken_db": {
           "pattern": "^.*$",
           "format": "dir-path",
-          "errorMessage": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. [recquired if not 'skip_host_filtering']"
+          "description": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. [recquired if not 'skip_host_filtering']"
         },
         "assembly_type":  {
           "type": "string",
           "default" : "rnaviral",
-          "errorMessage": "Assmembly mode (used for: spades). Managed values are 'metaviral', 'rnaviral' and 'corona'; for other modes, refer to the spades documentation and provide the option as it should be added to the command line."
+          "description": "Assmembly mode (used for: spades). Managed values are 'metaviral', 'rnaviral' and 'corona'; for other modes, refer to the spades documentation and provide the option as it should be added to the command line."
+        },
+        "realign":  {
+          "type": "string",
+          "default" : "yes",
+          "description": "Whether to realigne reads vs assembly"
         }
       },
-      "required": ["sample_name", "path_fq_R1", "path_ref_genome"]
+      "required": ["sample_name", "path_fq_R1"]
     }
   }

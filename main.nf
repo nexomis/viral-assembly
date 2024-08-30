@@ -34,10 +34,10 @@ def parse_sample_entry(it) {
   def meta = [
     "id": it[0],
     "assembly_type": it[5],
-    "assembler": "spades",
+    "assembler": "spades", // make sure it's possible
     "host_removal": kraken2_db? "yes" : "no",
     "abacas": genome_ref? "yes" : "no",
-    "realign": "yes"
+    "realign": it[6]
   ]
   return [meta, files, kraken2_db, genome_ref]
 }
@@ -76,11 +76,11 @@ workflow {
   | set {readsInputs}
 
   rawInputs
-  | map { [it[0], it[2]] }
+  | map { [it[0].id, it[2]] }
   | set {k2Inputs}
 
   rawInputs
-  | map { [it[0], it[3]] }
+  | map { [it[0].id, it[3]] }
   | set {refGenomeInputs}
 
   // START PRIMARY
@@ -118,11 +118,20 @@ workflow {
   trimmedInputs
   | map {
     it[0].args_spades = make_spades_args(it[0])
-    return it
+    return [it[0].id, it]
   }
-  | set {trimmedInputsWithAssemblyArgs}
+  | join(k2Inputs, by: 0, remainder: true)
+  | join(refGenomeInputs, by: 0, remainder: true)
+  | map {[it[1][0], it[1][1], it[2], it[3]]}
+  | set {inputsForViralAssembly}
+  //| join(refGenomeInputs, by: 0)
+  // k2Inputs
+  //| view {
+
+  //}
+  //| set {trimmedInputsWithAssemblyArgs}
   
-  VIRAL_ASSEMBLY(trimmedInputsWithAssemblyArgs, k2Inputs, refGenomeInputs)
+  VIRAL_ASSEMBLY(inputsForViralAssembly)
   // END ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
 
 }
