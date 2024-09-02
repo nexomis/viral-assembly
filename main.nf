@@ -29,14 +29,20 @@ def parse_sample_entry(it) {
   def files = []
   if (it[1] &&!it[1].isEmpty()) files << file(it[1], checkIfExists: true)
   if (it[2] &&!it[2].isEmpty()) files << file(it[2], checkIfExists: true)
-  def genome_ref = it[3] &&!it[3].isEmpty()? file(it[3], checkIfExists: true) : null
-  def kraken2_db = it[4] &&!it[4].isEmpty()? file(it[4], checkIfExists: true) : null
-  def meta = [
+  def genome_ref = (it[3] &&!it[3].isEmpty())? file(it[3], checkIfExists: true) : null
+  def kraken2_db = []
+  if (it[4] &&!it[4].isEmpty()) {
+    it[4].split(/;/).eachWithIndex() { db_path, idx -> 
+      kraken2_db << file(db_path, checkIfExists: true)
+    }
+  }
+  else {
+    kraken2_db = null
+  }
+  meta = [
     "id": it[0],
     "assembly_type": it[5],
     "assembler": "spades", // make sure it's possible
-    "host_removal": kraken2_db? "yes" : "no",
-    "abacas": genome_ref? "yes" : "no",
     "realign": it[6]
   ]
   return [meta, files, kraken2_db, genome_ref]
@@ -76,13 +82,15 @@ workflow {
   | set {readsInputs}
 
   rawInputs
+  | filter { it[2] }
   | map { [it[0].id, it[2]] }
   | set {k2Inputs}
 
   rawInputs
+  | filter { it[3] }
   | map { [it[0].id, it[3]] }
   | set {refGenomeInputs}
-
+  
   // START PRIMARY
   if (params.skip_primary) { // Note: skip_primary, include skiping spring_decompress step !!
     readsInputs
@@ -110,11 +118,7 @@ workflow {
   }
   // END PRIMARY
 
-
-  // START ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
-
   //// reads channel format: update meta
-  // TODO: match between 'meta.kraken_db_id of' and 'meta.id' of krakenDb ?!
   trimmedInputs
   | map {
     it[0].args_spades = make_spades_args(it[0])
@@ -122,16 +126,8 @@ workflow {
   }
   | join(k2Inputs, by: 0, remainder: true)
   | join(refGenomeInputs, by: 0, remainder: true)
-  | map {[it[1][0], it[1][1], it[2], it[3]]}
   | set {inputsForViralAssembly}
-  //| join(refGenomeInputs, by: 0)
-  // k2Inputs
-  //| view {
 
-  //}
-  //| set {trimmedInputsWithAssemblyArgs}
-  
   VIRAL_ASSEMBLY(inputsForViralAssembly)
-  // END ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
-
+  
 }

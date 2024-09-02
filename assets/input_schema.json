@@ -51,8 +51,8 @@
         },
         "host_kraken_db": {
           "pattern": "^.*$",
-          "format": "dir-path",
-          "description": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. [recquired if not 'skip_host_filtering']"
+          "format": "string",
+          "description": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. Can specifify up to 3 with ; separated"
         },
         "assembly_type":  {
           "type": "string",

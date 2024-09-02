@@ -49,30 +49,9 @@
                     "type": "string",
                     "description": "Biocontaners registry of docker images. Note: Does not applied to every containers process"
                 },
-
                 "skip_primary": {
                     "type": "boolean",
                     "description": "Skip primary analysis",
-                    "default": false
-                },
-                "skip_host_filtering": {
-                    "type": "boolean",
-                    "description": "Skip host reads removing (using kraken)",
-                    "default": false
-                },
-                "skip_abacas": {
-                    "type": "boolean",
-                    "description": "Skip abacas (scaffolding). Not recommended: may lead to ambiguous results due to the probable redundancy of the raw scaffolds obtained from spades.",
-                    "default": false
-                },
-                "skip_bowtie2": {
-                    "type": "boolean",
-                    "description": "Skip bowtie2 (index build and mapping)",
-                    "default": false
-                },
-                "skip_quast": {
-                    "type": "boolean",
-                    "description": "Skip quast QC",
                     "default": false
                 }
             }
