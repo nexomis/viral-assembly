@@ -1,6 +1,13 @@
-/data/test/
+/data/test/inputs/fq
+/data/test/inputs/genome_ref
+/data/test/inputs/k2*/
+/data/test/out_dir
 /work/
 .nextflow*
 /out_dir/
 /.nextflow/
 note.txt
+/data/k2_viral*
+/data/out_dir
+/data/work
+/data/k2*

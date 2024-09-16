@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
-
+nextflow.preview.output = true
 include { validateParameters; paramsHelp; paramsSummaryLog; fromSamplesheet } from 'plugin/nf-validation'
-
+include { showSchemaHelp; extractType } from './modules/config/schema_helper.nf'
 
 log.info """
     |            #################################################
@@ -18,61 +18,41 @@ log.info """
 
 if (params.help) {
   log.info paramsHelp("nextflow run nexomis/viral-assembly --input </path/to/samplesheet> [args]")
+  log.info showSchemaHelp("assets/input_schema.json")
+  log.info showSchemaHelp("assets/k2_db_schema.json")
+  log.info showSchemaHelp("assets/ref_genome_schema.json")
   exit 0
 }
 validateParameters()
 log.info paramsSummaryLog(workflow)
 
 file(params.out_dir + "/nextflow").mkdirs()
-
-def parse_sample_entry_wReadType(it) {  // sample_name,path_raw_R1,path_raw_R2,ref_genome,host_taxid,assembly_type(meta/viral/coronavirus)
-// replaced by 'parse_sample_entry()' because 'read_type' is defined here and on SPRING_DECOMPRESS process (called by PRIMARY_FROM_READS worflow) ... 
-  def meta = [ "id": it[0], "ref_genome": it[3], "host_txid": it[4], "assembly_type": it[5] ]
-  def r1_file = file(it[1])
-  if (it[2] == "") {
-    if (r1_file.getExtension() == "spring") {
-      meta.read_type = "spring"
-    } else {
-      meta.read_type = "SR"
+// groovy fonction within nextflow script
+def parse_sample_entry(it) {
+  def type = "SR"
+  def files = [file(it[1])]
+  if (it[2] && !it[2].isEmpty() ) {
+    files << file(it[2])
+    type = "PE"
+  } else {
+    if (it[1].toString().toLowerCase().endsWith("spring")) {
+      type = "spring"
     }
-    return [meta, [r1_file] ]
-  } else {
-    def r2_file = file(it[2])
-    meta.read_type = "PE"
-    return [meta, [r1_file, r2_file] ]
   }
+  meta = [
+    "id": it[0],
+    "read_type": type,
+    "ref_id": (it[3] && !it[3].isEmpty() ) ? it[3] : null,
+    "k2_ids": (it[4] && !it[4].isEmpty() ) ? it[4].split(/;/) : [],
+    "assembler": it[5].split(/;/),
+    "realign": it[6]
+  ]
+  return [meta, files]
 }
-
-def parse_sample_entry(it) {  // sample_name,path_raw_R1,path_raw_R2,ref_genome,host_kraken_db,assembly_type(meta/viral/coronavirus)
-  def meta = [ "id": it[0], "ref_genome": it[3], "host_kraken_db": it[4], "assembly_type": it[5] ]
-  def r1_file = file(it[1])
-  if (it[2] == "") {
-    return [meta, [r1_file] ]
-  } else {
-    def r2_file = file(it[2])
-    return [meta, [r1_file, r2_file] ]
-  }
-}
-
-def make_spades_args(meta) {
-  spades_args = []
-  if (meta.assembly_type == "metaviral") {
-    spades_args << "--metaviral"
-  } else if (meta.assembly_type == "corona") {
-    spades_args << "--corona"
-  } else if (meta.assembly_type == "rnaviral") {
-    spades_args << "--rnaviral"
-  } else {
-    spades_args << "meta.assembly_type"
-    println "Unknown value of 'assembly_type': ${meta.assembly_type}. Argument integrated as is in the assembler command line!!!"
-  }
-  return spades_args.join(" ")
-}
-
   
 // include
 include {PRIMARY_FROM_READS} from './modules/subworkflows/primary/from_reads/main.nf'
-include {VIRAL_ASSEMBLY} from './modules/subworkflows/assembly/viral_assembly/main.nf'
+include {VIRAL_ASSEMBLY} from './modules/subworkflows/viral_assembly/main.nf'
 
 workflow {
   // START PARSING SAMPLE SHEET
@@ -80,48 +60,56 @@ workflow {
   | map {
     return parse_sample_entry(it)
   }
-  | set { rawInputs }
-  // END PARSING SAMPLE SHEET
+  | set { readsInputs }
+
+  Channel.fromSamplesheet("k2_dbs")
+  | map { [["id": it[0]], it[1]] }
+  | set {k2Inputs}
+
+  Channel.fromSamplesheet("ref_genomes")
+  | map { [["id": it[0]], it[1]] }
+  | set {refGenomeInputs}
 
   // START PRIMARY
-  if (params.skip_primary) { // Note: skip_primary, include skiping spring_decompress step !!
-    rawInputs
-    | map {
-      if (it[1].size() == 1) {
-        it[0].read_type = "SR"
-      } else {
-        it[0].read_type = "PE"
-      }
-      return it
-    }
-    | set {trimmedInputs}
+  if (params.skip_primary) {
+    trimmedInputs = readsInputs
   } else {
     if ( params.kraken2_db == null ) {
       error "kraken2_db argument required for primary analysis"
     }
+
     Channel.fromPath(params.kraken2_db, type: "dir", checkIfExists: true)
+    | map {[["id": "kraken_db"], it]}
     | collect
     | set {dbPathKraken2}
+
+    numReads = Channel.value(params.num_reads_sample_qc)
     
-    PRIMARY_FROM_READS(rawInputs, dbPathKraken2)
-    
-    trimmedInputs = PRIMARY_FROM_READS.out.trimmed
+    PRIMARY_FROM_READS(readsInputs, dbPathKraken2, numReads)
+    PRIMARY_FROM_READS.out.trimmed
+    | set { trimmedInputs }
   }
   // END PRIMARY
 
+  VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs)
 
-  // START ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
+  publish:
+  VIRAL_ASSEMBLY.out.quast_dir            >> 'quast'
+  VIRAL_ASSEMBLY.out.all_scaffolds        >> 'all_scaffolds'
+  VIRAL_ASSEMBLY.out.all_aln              >> 'all_aln'
+  PRIMARY_FROM_READS.out.trimmed          >> 'fastp'
+  PRIMARY_FROM_READS.out.fastqc_trim_html >> 'fastqc_trim'
+  PRIMARY_FROM_READS.out.fastqc_raw_html  >> 'fastqc_raw'
+  PRIMARY_FROM_READS.out.multiqc_html     >> 'primary_multiqc'
+}
 
-  //// reads channel format: update meta
-  // TODO: match between 'meta.kraken_db_id of' and 'meta.id' of krakenDb ?!
-  trimmedInputs
-  | map {
-    it[0].spades_args = make_spades_args(it[0])
-    return it
+output {
+  directory "${params.out_dir}"
+  mode params.publish_dir_mode
+  'fastp' {
+    enabled params.save_fastp
   }
-  | set {trimmedInputsWithAssemblyArgs}
-  
-  VIRAL_ASSEMBLY(trimmedInputsWithAssemblyArgs) 
-  // END ASSEMBLY: KRAKEN2_SPADES_ABACAS_BOWTIE2wBUILD_QUAST
-
+  'all_aln' {
+    enabled params.save_aln
+  }
 }

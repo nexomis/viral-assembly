@@ -1,30 +1,31 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/schema_input.json",
-    "title": "nexomis/viral-assembly pipeline - params.input schema",
-    "description": "Sample Sheet input for viral genome assembly",
+    "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/input_schema.json",
+    "title": "Sample sheet format for --input",
+    "description": "Sample ids with reads paths and metadata",
     "type": "array",
     "items": {
       "type": "object",
       "properties": {
-        "sample_name": {
+        "id": {
           "type": "string",
           "pattern": "^[a-zA-Z0-9_]+$",
-          "errorMessage": "Sample name must contains only alphanumeric chars or underscore"
+          "uniqueItems": true,
+          "description": "Sample unique IDs (alphanum or _)"
         },
-        "path_fq_R1": {
+        "R1": {
           "type": "string",
-          "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|bz|bzip2)?$",
+          "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|)?$",
           "format": "file-path",
-          "errorMessage": "Path for R1 must be provided, cannot contain spaces and must end with .fastq, .fq, .spring optionally followed by .gz (or .z, .bz or .bzip2)"
+          "description": "Path for R1 reads with (.fastq, .fq), can be gziped. Spring files accepted."
         },
-        "path_fq_R2": {
+        "R2": {
+          "description": "Path for R2 reads with (.fastq, .fq), can be gziped.",
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|bz|bzip2)?$",
-              "format": "file-path",
-              "errorMessage": "Path for R2, if provided, cannot contain spaces and must end with .fastq, .fq optionally followed by .gz (or .z, .bz or .bzip2)"
+              "pattern": "^\\S+\\.(fastq|fq)(\\.)?(gz|z|gzip)?$",
+              "format": "file-path"
             },
             {
               "type": "string",
@@ -33,23 +34,43 @@
           ],
           "default": ""
         },
-        "path_ref_genome": {
+        "ref_genome": {
           "type": "string",
-          "pattern": "^\\S+\\.(fasta|fa|fna)(\\.)?(gz|z|bz|bzip2)?$",
-          "format": "file-path",
-          "errorMessage": "Path for fasta genome reference must be provided, cannot contain spaces and must end with .fasta, .fa, .fna optionally followed by .gz (or .z, .bz or .bzip2) [recquired if not 'skip_abacas']"
+          "pattern": "^[a-zA-Z0-9_]*$", 
+          "description": "Id of the reference genome from --ref_genomes.",
+          "default": ""
         },
-        "host_kraken_db": {
-          "pattern": "^.*$",
-          "format": "dir-path",
-          "errorMessage": "Path of host organism kraken db in order to remore reads from host genome/transcriptome. [recquired if not 'skip_host_filtering']"
-        },
-        "assembly_type":  {
+        "k2_dbs": {
+          "pattern": "^[a-zA-Z0-9_]*(;[a-zA-Z0-9_]+)*$",
           "type": "string",
-          "default" : "rnaviral",
-          "errorMessage": "Assmembly mode (used for: spades). Managed values are 'metaviral', 'rnaviral' and 'corona'; for other modes, refer to the spades documentation and provide the option as it should be added to the command line."
+          "description": "Semilocon-separated list of kraken2 index ids as given --k2_dbs.",
+          "default": ""
+        },
+        "assembler":  {
+          "type": "string",
+          "default" : "spades:rnaviral",
+          "pattern": "^(spades:rnaviral|spades:metaviral|spades:corona)(;(spades:rnaviral|spades:metaviral|spades:corona))*$",
+          "description": "Semilocon-separated list of assembly strategy from \"spades:rnaviral\",\"spades:metaviral\",\"spades:corona\""
+        },
+        "realign":  {
+          "type": "string",
+          "default" : "yes",
+          "description": "Whether to realign reads vs assembly"
         }
       },
-      "required": ["sample_name", "path_fq_R1", "path_ref_genome"]
+      "required": ["id", "R1"]
     }
   }
+
+I would like you to write a groovy function that take as input a json schema like above and as output 
+
+Required columns:
+  sample_name     [string]    Sample name must contains only alphanumeric chars or underscore
+  {{key}}         [{{type}}]  {{description}}
+
+Optional columns:
+  {{key}}         [{{type}}]  {{description}} 
+
+I want it to be a function that I put in a module file imported in main.nf workflow file and then used with `log.info showSchemaHelp("assets/input_schema.json")`
+
+
