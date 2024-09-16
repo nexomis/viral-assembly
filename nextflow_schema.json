@@ -15,13 +15,34 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
+                    "pattern": ".csv$",
                     "schema": "assets/input_schema.json",
                     "description": "Path to comma-separated file containing information about the samples you would like to analyse."
+                },
+                "ref_genomes": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
+                    "schema": "assets/ref_genome_schema.json",
+                    "description": "Path to csv file containing information about the reference genomes."
+                },
+                "k2_dbs": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
+                    "schema": "assets/k2_db_schema.json",
+                    "description": "Path to csv file containing information about the k2 indices."
                 },
                 "save_fastp": {
                     "type": "boolean",
                     "description": "Save fastp trimmed fastq.",
+                    "default": false
+                },
+                "save_aln": {
+                    "type": "boolean",
+                    "description": "Save mapping files (vs assemblies).",
                     "default": false
                 },
                 "out_dir": {
@@ -38,13 +59,11 @@
                 }
             }
         },
-        "global_worflow": {
+        "global_workflow": {
             "title": "global workflow",
             "type": "object",
             "description": "Options for global worflow",
             "properties": {
-
-                
                 "biocontainers_registry": {
                     "type": "string",
                     "description": "Biocontaners registry of docker images. Note: Does not applied to every containers process"
@@ -116,7 +135,7 @@
                 },
                 "num_reads_sample_qc": {
                     "type": "integer",
-                    "default": 500000,
+                    "default": 250000,
                     "description": "Number of reads to subsample before kraken2 and fastqc"
                 }
             }
@@ -167,13 +186,13 @@
                     "description": "Number of cpu for high process."
                 },
                 "mem_high": {
-                    "type": "string",
-                    "default": "28.GB",
+                    "type": "integer",
+                    "default": 28,
                     "description": "Memory for high process (eg. 'samtools sort', 'bowtie2', ...)."
                 },
                 "spades_memory": {
                     "type": "integer",
-                    "default": "28",
+                    "default": 28,
                     "description": "Amount of memory in GB for SPAdes, default is '28' (GB)."
                 },
                 "kraken2_memory": {
@@ -186,10 +205,11 @@
     },
     "allOf": [
         { "$ref": "#/definitions/input_output_options" },
+        { "$ref": "#/definitions/global_workflow" },
+        { "$ref": "#/definitions/fastp_options" },
         { "$ref": "#/definitions/denovo_assembly" },
+        { "$ref": "#/definitions/primary_opts" },
         { "$ref": "#/definitions/mapping_on_assembled" },
         { "$ref": "#/definitions/resources_options" }
     ]
 }
-
-

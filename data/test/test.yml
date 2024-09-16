@@ -1,0 +1,5 @@
+out_dir: data/test/out_dir
+input: data/test/inputs/samplesheet.csv
+k2_dbs: data/test/inputs/k2_dbs.csv
+ref_genomes: data/test/inputs/ref_genomes.csv
+kraken2_db: data/test/inputs/k2_viral_20240605

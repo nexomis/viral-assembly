@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/kraken2_db_schema.json",
+    "title": "Sample sheet format for --k2_dbs",
+    "description": "Kraken2 databases IDs with paths",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]+$",
+          "uniqueItems": true,
+          "description": "Kraken2 database unique IDs (alphanum or _)"
+        },
+        "path": {
+          "type": "string",
+          "format": "dir-path",
+          "description": "Path for kraken2 database as a directory"
+        }
+      },
+      "required": ["id", "path"]
+    }
+  }

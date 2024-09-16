@@ -1,5 +1,6 @@
-/data/test/fq
-/data/test/genome_ref
+/data/test/inputs/fq
+/data/test/inputs/genome_ref
+/data/test/inputs/k2*/
 /data/test/out_dir
 /work/
 .nextflow*

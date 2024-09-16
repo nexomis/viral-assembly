@@ -1,6 +1,0 @@
-sample_name,path_fq_R1,path_fq_R2,path_ref_genome,host_kraken_db,assembly_type,realign
-s2,test/fq/s2_R1.fq.gz,test/fq/s2_R2.fq.gz,test/genome_ref/vrl_genome_ref_s2.fa,k2_HPRC_20230810/db;k2_standard_08gb_20240605/,rnaviral,yes
-s1,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,test/genome_ref/sars_cov2_wuhan_refseq.fa,k2_HPRC_20230810/db,corona,yes
-s1_no_kraken,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,test/genome_ref/sars_cov2_wuhan_refseq.fa,,corona,yes
-s1_no_realign,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,test/genome_ref/sars_cov2_wuhan_refseq.fa,,corona,no
-s1_no_ref,test/fq/SRR10903401_1.fastq.gz,test/fq/SRR10903401_2.fastq.gz,,k2_HPRC_20230810/db,corona,yes
