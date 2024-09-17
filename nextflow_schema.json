@@ -24,16 +24,16 @@
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "schema": "assets/ref_genome_schema.json",
+                    "schema": "assets/ref_genomes_schema.json",
                     "description": "Path to csv file containing information about the reference genomes."
                 },
-                "k2_dbs": {
+                "class_dbs": {
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "schema": "assets/k2_db_schema.json",
-                    "description": "Path to csv file containing information about the k2 indices."
+                    "schema": "assets/class_dbs_schema.json",
+                    "description": "Path to csv file containing information about the classification database for iterative removal of reads."
                 },
                 "save_fastp": {
                     "type": "boolean",

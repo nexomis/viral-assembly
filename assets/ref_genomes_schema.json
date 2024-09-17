@@ -15,7 +15,7 @@
         },
         "path": {
           "type": "string",
-          "pattern": ".(fasta|fa|fna)(\\.)?(gz|z|gzip)?$",
+          "pattern": "\\.(fasta|fa|fna)(\\.)?(gz|z|gzip)?$",
           "format": "file-path",
           "description": "Path for fasta genome reference must be provided with the right extention(fasta, fa or fna), can be gziped."
         }

@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/kraken2_db_schema.json",
-    "title": "Sample sheet format for --k2_dbs",
-    "description": "Kraken2 databases IDs with paths",
+    "title": "Sample sheet format for --class_dbs",
+    "description": "Classification databases IDs with paths",
     "type": "array",
     "items": {
       "type": "object",

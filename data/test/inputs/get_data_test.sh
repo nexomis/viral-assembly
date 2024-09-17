@@ -20,6 +20,7 @@ wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/858/895/GCF_009858895.2_AS
   -O genome_ref/sars_cov2_wuhan_refseq.fa.gz
 gunzip genome_ref/sars_cov2_wuhan_refseq.fa.gz
 cp genome_ref/sars_cov2_wuhan_refseq.fa genome_ref/vrl_genome_ref_s2.fa
+gzip genome_ref/vrl_genome_ref_s2.fa
 
 # dll kraken databases
 mkdir k2_HPRC_20230810

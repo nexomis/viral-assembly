@@ -19,8 +19,8 @@ log.info """
 if (params.help) {
   log.info paramsHelp("nextflow run nexomis/viral-assembly --input </path/to/samplesheet> [args]")
   log.info showSchemaHelp("assets/input_schema.json")
-  log.info showSchemaHelp("assets/k2_db_schema.json")
-  log.info showSchemaHelp("assets/ref_genome_schema.json")
+  log.info showSchemaHelp("assets/class_dbs_schema.json")
+  log.info showSchemaHelp("assets/ref_genomes_schema.json")
   exit 0
 }
 validateParameters()
@@ -43,9 +43,11 @@ def parse_sample_entry(it) {
     "id": it[0],
     "read_type": type,
     "ref_id": (it[3] && !it[3].isEmpty() ) ? it[3] : null,
-    "k2_ids": (it[4] && !it[4].isEmpty() ) ? it[4].split(/;/) : [],
-    "assembler": it[5].split(/;/),
-    "realign": it[6]
+    "class_db_ids": (it[4] && !it[4].isEmpty() ) ? it[4].split(/;/) : [],
+    "class_tool": it[5],
+    "assembler": it[6].split(/;/),
+    "realign": it[7],
+    "do_abacas": it[8]
   ]
   return [meta, files]
 }
@@ -62,7 +64,7 @@ workflow {
   }
   | set { readsInputs }
 
-  Channel.fromSamplesheet("k2_dbs")
+  Channel.fromSamplesheet("class_dbs")
   | map { [["id": it[0]], it[1]] }
   | set {k2Inputs}
 
