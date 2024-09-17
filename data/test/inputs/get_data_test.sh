@@ -1,4 +1,3 @@
-mkdir -p data/test/inputs
 
 cd data/test/inputs
 
