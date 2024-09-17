@@ -54,9 +54,9 @@
         },
         "assembler":  {
           "type": "string",
-          "default" : "spades:rnaviral",
-          "pattern": "^(spades:rnaviral|spades:metaviral|spades:corona)(;(spades:rnaviral|spades:metaviral|spades:corona))*$",
-          "description": "Semilocon-separated list of assembly strategy from \"spades:rnaviral\",\"spades:metaviral\",\"spades:corona\""
+          "default" : "spades_rnaviral",
+          "pattern": "^(spades_rnaviral|spades_metaviral|spades_corona)(;(spades_rnaviral|spades_metaviral|spades_corona))*$",
+          "description": "Semilocon-separated list of assembly strategy from \"spades_rnaviral\",\"spades_metaviral\",\"spades_corona\""
         },
         "realign":  {
           "type": "string",
@@ -67,6 +67,11 @@
           "type": "string",
           "default" : "yes",
           "description": "Whether to perform abacas with the provided reference (if any)"
+        },
+        "keep_before_abacas":  {
+          "type": "string",
+          "default" : "yes",
+          "description": "Whether to keep scaffolds before abacas to Quast"
         }
       },
       "required": ["id", "R1"]

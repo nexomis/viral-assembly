@@ -66,6 +66,7 @@
             "properties": {
                 "biocontainers_registry": {
                     "type": "string",
+                    "default": "quay.io",
                     "description": "Biocontaners registry of docker images. Note: Does not applied to every containers process"
                 },
                 "skip_primary": {
@@ -185,10 +186,20 @@
                     "default": 16,
                     "description": "Number of cpu for high process."
                 },
+                "mem_low": {
+                    "type": "integer",
+                    "default": 15,
+                    "description": "Memory for low process."
+                },
+                "mem_med": {
+                    "type": "integer",
+                    "default": 30,
+                    "description": "Memory for mid process."
+                },
                 "mem_high": {
                     "type": "integer",
-                    "default": 28,
-                    "description": "Memory for high process (eg. 'samtools sort', 'bowtie2', ...)."
+                    "default": 120,
+                    "description": "Memory for high process.."
                 },
                 "spades_memory": {
                     "type": "integer",
@@ -199,6 +210,11 @@
                     "type": "integer",
                     "default": 10,
                     "description": "Amount of memory in GB for Kraken2, default is 12 GB."
+                },
+                "kraken2_cpus": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Amount of CPUs for kraken2"
                 }
             }
         }
