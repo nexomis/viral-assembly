@@ -151,6 +151,11 @@
                     "default": "nucmer",
                     "options": ["nucmer", "promer"],
                     "description": "ABACAS - The MUMmer program used by ABACAS for alignment. Available options: 'nucmer' or 'promer'."
+                },
+                "args_spades": {
+                    "type": "string",
+                    "default": "",
+                    "description": "ABACAS - The MUMmer program used by ABACAS for alignment. Available options: 'nucmer' or 'promer'."
                 }
             }
         },
@@ -159,10 +164,10 @@
             "type": "object",
             "description": "Options for the filtered reads (trimming + host filtering) on assembly scaffolds",
             "properties": {
-                "bowtie2_mode": {
+                "args_bowtie2": {
                     "type": "string",
-                    "default": "end-to-end",
-                    "description": "Bowtie2 mapping mode ('end-to-end', 'local', 'very-fast', 'very-sensitive-local', ...)"
+                    "default": "--end-to-end",
+                    "description": "Bowtie2 mapping args"
                 },
             }
         },
