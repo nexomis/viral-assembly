@@ -97,13 +97,13 @@ workflow {
   VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs)
 
   publish:
-  VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
-  VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
-  VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
   PRIMARY_FROM_READS.out.trimmed              >> 'fastp'
   PRIMARY_FROM_READS.out.fastqc_trim_html     >> 'fastqc_trim'
   PRIMARY_FROM_READS.out.fastqc_raw_html      >> 'fastqc_raw'
   PRIMARY_FROM_READS.out.multiqc_html         >> 'primary_multiqc'
+  VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
+  VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
+  VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
   VIRAL_ASSEMBLY.out.pre_abacas_scaffolds     >> 'pre_abacas'
   VIRAL_ASSEMBLY.out.post_abacas_scaffolds    >> 'post_abacas'
 }
