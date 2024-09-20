@@ -48,7 +48,9 @@ def parse_sample_entry(it) {
     "assembler": it[6].split(/;/),
     "realign": it[7],
     "do_abacas": it[8],
-    "keep_before_abacas": it[9]
+    "keep_before_abacas": it[9],
+    "dedup": it[10],
+    "keep_before_dedup": it[11]
   ]
   return [meta, files]
 }

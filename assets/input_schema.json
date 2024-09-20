@@ -72,6 +72,16 @@
           "type": "string",
           "default" : "yes",
           "description": "Whether to keep scaffolds before abacas to Quast"
+        },
+        "dedup":  {
+          "type": "string",
+          "default" : "yes",
+          "description": "Whether to perform deduplication before assembly"
+        },
+        "keep_before_dedup":  {
+          "type": "string",
+          "default" : "no",
+          "description": "Whether to keep reads before depud to generate both assembly before and after dedup"
         }
       },
       "required": ["id", "R1"]
