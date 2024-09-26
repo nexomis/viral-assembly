@@ -11,3 +11,5 @@ note.txt
 /data/out_dir
 /data/work
 /data/k2*
+/node_modules
+/package*

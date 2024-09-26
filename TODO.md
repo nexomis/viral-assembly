@@ -25,7 +25,9 @@ Use Abacas or alternative to reorder contigs/scaffolds based on a reference geno
 
 ## Evaluate ElasticBLAST: in-depth characterization of unassigned reads (conta, large viral derivation, ...) by blasting of a subset of unmapped reads without managing db nt?
 
-## Selection of contigs based on proteome. 
+## Selection of contigs based on reference proteome or reference genome. 
+- Input is a blast outfmt 6 results
+- 
 - Build an incidence matrix between contigs and input proteins
 - Input based on tblastn, diamond or Miniprot.
  - use protein coverage as incidence values

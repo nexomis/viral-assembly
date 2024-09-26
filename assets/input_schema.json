@@ -88,15 +88,3 @@
     }
   }
 
-I would like you to write a groovy function that take as input a json schema like above and as output 
-
-Required columns:
-  sample_name     [string]    Sample name must contains only alphanumeric chars or underscore
-  {{key}}         [{{type}}]  {{description}}
-
-Optional columns:
-  {{key}}         [{{type}}]  {{description}} 
-
-I want it to be a function that I put in a module file imported in main.nf workflow file and then used with `log.info showSchemaHelp("assets/input_schema.json")`
-
-
