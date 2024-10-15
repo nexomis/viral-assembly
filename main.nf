@@ -39,7 +39,7 @@ def parse_sample_entry(it) {
       type = "spring"
     }
   }
-  meta = [
+  def meta = [
     "id": it[0],
     "read_type": type,
     "ref_id": (it[3] && !it[3].isEmpty() ) ? it[3] : null,
@@ -50,8 +50,17 @@ def parse_sample_entry(it) {
     "do_abacas": it[8],
     "keep_before_abacas": it[9],
     "dedup": it[10],
-    "keep_before_dedup": it[11]
+    "keep_before_dedup": it[11],
+    "proteome_id": ""
   ]
+  if (it[12] != "") {
+    meta.proteome_id = it[12]
+    meta.keep_before_hannot = it[13]
+    meta.filter_annot = "yes"
+    meta.revcomp = "yes"
+    meta.retain_only_annot = "yes"
+  }
+
   return [meta, files]
 }
   
@@ -67,13 +76,30 @@ workflow {
   }
   | set { readsInputs }
 
-  Channel.fromSamplesheet("class_dbs")
-  | map { [["id": it[0]], it[1]] }
-  | set {k2Inputs}
+  if (params.class_dbs) {
+    Channel.fromSamplesheet("class_dbs")
+    | map { [["id": it[0]], it[1]] }
+    | set {k2Inputs}
+  } else {
+    k2Inputs = Channel.empty()
+  }
 
-  Channel.fromSamplesheet("ref_genomes")
-  | map { [["id": it[0]], it[1]] }
-  | set {refGenomeInputs}
+  
+  if (params.ref_genomes) {
+    Channel.fromSamplesheet("ref_genomes")
+    | map { [["id": it[0]], it[1]] }
+    | set {refGenomeInputs}
+  } else {
+    refGenomeInputs = Channel.empty()
+  }
+
+  if (params.prot) {
+    Channel.fromSamplesheet("prot")
+    | map {[[id: it[0], regex_prot_name: it[2]], file(it[1])]}
+    | set {protFasta}
+  } else {
+    protFasta = Channel.empty()
+  }
 
   // START PRIMARY
   if (params.skip_primary) {
@@ -98,7 +124,7 @@ workflow {
   }
   // END PRIMARY
 
-  VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs)
+  VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs, protFasta)
 
   publish:
   PRIMARY.out.trimmed                         >> 'trimmed_and_filtered'
@@ -107,11 +133,15 @@ workflow {
   PRIMARY.out.multiqc_html                    >> 'multiqc'
   PRIMARY.out.kraken2_report                  >> 'classification'
   PRIMARY.out.class_report                    >> 'classification'
+  VIRAL_ASSEMBLY.out.cleaned_reads            >> 'cleaned_reads'
   VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
   VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
   VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
   VIRAL_ASSEMBLY.out.pre_abacas_scaffolds     >> 'pre_abacas'
   VIRAL_ASSEMBLY.out.post_abacas_scaffolds    >> 'post_abacas'
+  VIRAL_ASSEMBLY.out.post_hannot_scaffolds    >> 'post_hannot'
+  VIRAL_ASSEMBLY.out.hannot_raw               >> 'hannot_raw'
+  VIRAL_ASSEMBLY.out.hannot_filtered          >> 'hannot_filtered'
 }
 
 output {
@@ -119,6 +149,9 @@ output {
   mode params.publish_dir_mode
   'trimmed_and_filtered' {
     enabled params.save_fastp
+  }
+  'cleaned_reads' {
+    enabled params.save_clean
   }
   'all_aln' {
     enabled params.save_aln

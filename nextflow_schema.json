@@ -27,6 +27,14 @@
                     "schema": "assets/ref_genomes_schema.json",
                     "description": "Path to csv file containing information about the reference genomes."
                 },
+                "prot": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": ".csv$",
+                    "schema": "assets/prot_schema.json",
+                    "description": "Path to comma-separated file containing the proteome to use for annotation."
+                },
                 "class_dbs": {
                     "type": "string",
                     "format": "file-path",
@@ -38,6 +46,11 @@
                 "save_fastp": {
                     "type": "boolean",
                     "description": "Save fastp trimmed fastq.",
+                    "default": false
+                },
+                "save_clean": {
+                    "type": "boolean",
+                    "description": "Save clean fastq (after kraken2 removal).",
                     "default": false
                 },
                 "save_aln": {
@@ -165,6 +178,18 @@
                 }
             }
         },
+        "hannot": {
+            "title": "Hannot ars",
+            "type": "object",
+            "description": "Options for homology annotation",
+            "properties": {
+                "miniprot_opts": {
+                    "type": "string",
+                    "default": "-k 3 -L 5 -O 5 -n 1 -N 1000 -l 3 -E 0 -J 5 -F 8 -B 5 --outs 0.1 --outn 5",
+                    "description": "Options for the Miniprot software."
+                }
+            }
+        },
         "mapping_on_assembled": {
             "title": "mapping on assembled",
             "type": "object",
@@ -236,6 +261,7 @@
         { "$ref": "#/definitions/fastp_options" },
         { "$ref": "#/definitions/denovo_assembly" },
         { "$ref": "#/definitions/primary_opts" },
+        { "$ref": "#/definitions/hannot" },
         { "$ref": "#/definitions/mapping_on_assembled" },
         { "$ref": "#/definitions/resources_options" }
     ]

@@ -82,6 +82,17 @@
           "type": "string",
           "default" : "no",
           "description": "Whether to keep reads before depud to generate both assembly before and after dedup"
+        },
+        "ref_proteome": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]+$",
+          "default": "",
+          "description": "reference of the proteome in --prot, to apply hannot pipeline (after abacas)"
+        },
+        "keep_before_hannot":  {
+          "type": "string",
+          "default" : "yes",
+          "description": "Whether to keep scaffolds before hannot to Quast"
         }
       },
       "required": ["id", "R1"]

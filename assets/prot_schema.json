@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nexomis/viral-assembly/main/assets/prot_schema.json",
+    "title": "Sample sheet format for --prot",
+    "description": "Proteome to be used for assembly",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]+$",
+          "uniqueItems": true,
+          "description": "Sample unique IDs (alphanum or _)"
+        },
+        "proteome": {
+          "type": "string",
+          "pattern": "^\\S+\\.(fasta|fa|fna)(\\.)?(gz|z|)?$",
+          "format": "file-path",
+          "description": "fasta file with the target proteome"
+        },
+        "regex_prot_name": {
+          "type": "string",
+          "default": "^>.*GN=([^ ]+).*$",
+          "description": ""
+        }
+      },
+      "required": ["id", "proteome"]
+    }
+  }
+

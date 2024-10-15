@@ -14,3 +14,4 @@ note.txt
 /node_modules
 /package*
 /*.pileup
+sars2_proteome.fa

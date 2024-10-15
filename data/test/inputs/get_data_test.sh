@@ -22,6 +22,12 @@ gunzip genome_ref/sars_cov2_wuhan_refseq.fa.gz
 cp genome_ref/sars_cov2_wuhan_refseq.fa genome_ref/vrl_genome_ref_s2.fa
 gzip genome_ref/vrl_genome_ref_s2.fa
 
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/858/895/GCF_009858895.2_ASM985889v3/GCF_009858895.2_ASM985889v3_protein.faa.gz \
+  -O sars2_proteome.fa.gz
+gunzip sars2_proteome.fa.gz
+sed -i -r 's/YP_[0-9]+.[0-9] //g; s/ \[.*$//g ; s/ /_/g' sars2_proteome.fa
+
+
 # dll kraken databases
 mkdir k2_HPRC_20230810
 cd k2_HPRC_20230810
