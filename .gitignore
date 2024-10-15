@@ -13,3 +13,4 @@ note.txt
 /data/k2*
 /node_modules
 /package*
+/*.pileup

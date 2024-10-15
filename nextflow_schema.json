@@ -138,6 +138,12 @@
                     "type": "integer",
                     "default": 250000,
                     "description": "Number of reads to subsample before kraken2 and fastqc"
+                }, 
+                "tax_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Path to a custom taxonomy directory for recentrifuge.",
+                    "default": "${projectDir}/modules/subworkflows/primary/taxdump_26092024"
                 }
             }
         },

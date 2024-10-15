@@ -56,7 +56,7 @@ def parse_sample_entry(it) {
 }
   
 // include
-include {PRIMARY_FROM_READS} from './modules/subworkflows/primary/from_reads/main.nf'
+include {PRIMARY} from './modules/subworkflows/primary/main.nf'
 include {VIRAL_ASSEMBLY} from './modules/subworkflows/viral_assembly/main.nf'
 
 workflow {
@@ -88,10 +88,12 @@ workflow {
     | collect
     | set {dbPathKraken2}
 
+    taxDir = Channel.fromPath(params.tax_dir, type: 'dir')
+
     numReads = Channel.value(params.num_reads_sample_qc)
     
-    PRIMARY_FROM_READS(readsInputs, dbPathKraken2, numReads)
-    PRIMARY_FROM_READS.out.trimmed
+    PRIMARY(readsInputs, dbPathKraken2, taxDir, numReads)
+    PRIMARY.out.trimmed
     | set { trimmedInputs }
   }
   // END PRIMARY
@@ -99,10 +101,12 @@ workflow {
   VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs)
 
   publish:
-  PRIMARY_FROM_READS.out.trimmed              >> 'fastp'
-  PRIMARY_FROM_READS.out.fastqc_trim_html     >> 'fastqc_trim'
-  PRIMARY_FROM_READS.out.fastqc_raw_html      >> 'fastqc_raw'
-  PRIMARY_FROM_READS.out.multiqc_html         >> 'primary_multiqc'
+  PRIMARY.out.trimmed                         >> 'trimmed_and_filtered'
+  PRIMARY.out.fastqc_trim_html                >> 'fastqc_for_trimmed'
+  PRIMARY.out.fastqc_raw_html                 >> 'fastqc_for_raw'
+  PRIMARY.out.multiqc_html                    >> 'multiqc'
+  PRIMARY.out.kraken2_report                  >> 'classification'
+  PRIMARY.out.class_report                    >> 'classification'
   VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
   VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
   VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
@@ -113,7 +117,7 @@ workflow {
 output {
   directory "${params.out_dir}"
   mode params.publish_dir_mode
-  'fastp' {
+  'trimmed_and_filtered' {
     enabled params.save_fastp
   }
   'all_aln' {
