@@ -4,6 +4,8 @@
 
 Assemble viral genome and perform the associated QC. Starting from raw reads and one pre-built reference database in standard format (cf. README.md).
 
+![Schema not visible](./schema.drawio.svg)
+
 ## Test with simple data set
 First, edit manually 'data/get_data_test.sh': replace path 'host_kraken_db_s1' and 'host_kraken_db_s2'.
 
@@ -20,5 +22,7 @@ NXF_VER=23.10.1 nextflow run ../main.nf \
   --output_dir test/out_dir/
 ```
 
+## Citations
 
+TODO add citations
 
