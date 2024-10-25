@@ -21,6 +21,8 @@ if (params.help) {
   log.info showSchemaHelp("assets/input_schema.json")
   log.info showSchemaHelp("assets/class_dbs_schema.json")
   log.info showSchemaHelp("assets/ref_genomes_schema.json")
+  log.info showSchemaHelp("assets/prot_schema.json")
+  log.info showSchemaHelp("assets/anchors_schema.json")
   exit 0
 }
 validateParameters()
@@ -43,19 +45,20 @@ def parse_sample_entry(it) {
     "id": it[0],
     "read_type": type,
     "ref_id": (it[3] && !it[3].isEmpty() ) ? it[3] : null,
-    "class_db_ids": (it[4] && !it[4].isEmpty() ) ? it[4].split(/;/) : [],
-    "class_tool": it[5],
-    "assembler": it[6].split(/;/),
-    "realign": it[7],
-    "do_abacas": it[8],
-    "keep_before_abacas": it[9],
-    "dedup": it[10],
-    "keep_before_dedup": it[11],
+    "anchor_id": (it[4] && !it[4].isEmpty() ) ? it[4] : null,
+    "class_db_ids": (it[5] && !it[5].isEmpty() ) ? it[5].split(/;/) : [],
+    "class_tool": it[6],
+    "assembler": it[7].split(/;/),
+    "realign": it[8],
+    "do_abacas": it[9],
+    "keep_before_abacas": it[10],
+    "dedup": it[11],
+    "keep_before_dedup": it[12],
     "proteome_id": ""
   ]
-  if (it[12] != "") {
-    meta.proteome_id = it[12]
-    meta.keep_before_hannot = it[13]
+  if (it[13] != "") {
+    meta.proteome_id = it[13]
+    meta.keep_before_hannot = it[14]
     meta.filter_annot = "yes"
     meta.revcomp = "yes"
     meta.retain_only_annot = "yes"
@@ -93,6 +96,14 @@ workflow {
     refGenomeInputs = Channel.empty()
   }
 
+  if (params.anchors) {
+    Channel.fromSamplesheet("anchors")
+    | map { [["id": it[0]], it[1]] }
+    | set {anchorsInputs}
+  } else {
+    anchorsInputs = Channel.empty()
+  }
+
   if (params.prot) {
     Channel.fromSamplesheet("prot")
     | map {[[id: it[0], regex_prot_name: it[2]], file(it[1])]}
@@ -124,7 +135,7 @@ workflow {
   }
   // END PRIMARY
 
-  VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs, protFasta)
+  VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs, anchorsInputs, protFasta)
 
   publish:
   PRIMARY.out.trimmed                         >> 'trimmed_and_filtered'
@@ -134,6 +145,8 @@ workflow {
   PRIMARY.out.kraken2_report                  >> 'classification'
   PRIMARY.out.class_report                    >> 'classification'
   VIRAL_ASSEMBLY.out.cleaned_reads            >> 'cleaned_reads'
+  VIRAL_ASSEMBLY.out.anchored_reads           >> 'anchored_reads'
+  VIRAL_ASSEMBLY.out.unclassed_reads          >> 'unclassed_reads'
   VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
   VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
   VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
@@ -152,6 +165,12 @@ output {
   }
   'cleaned_reads' {
     enabled params.save_clean
+  }
+  'anchored_reads' {
+    enabled params.save_anchored
+  }
+  'unclassed_reads' {
+    enabled params.save_unclassed
   }
   'all_aln' {
     enabled params.save_aln

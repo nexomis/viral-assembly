@@ -3,7 +3,10 @@ input: data/test/inputs/samplesheet.csv
 prot: data/test/inputs/prot.csv
 class_dbs: data/test/inputs/class_dbs.csv
 ref_genomes: data/test/inputs/ref_genomes.csv
+anchors: data/test/inputs/ref_genomes.csv
 kraken2_db: data/test/inputs/k2_viral_20240605
 mem_high: 32
 save_aln: true
 save_clean: true
+save_anchored: true
+save_unclassed: true

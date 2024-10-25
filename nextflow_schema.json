@@ -27,6 +27,14 @@
                     "schema": "assets/ref_genomes_schema.json",
                     "description": "Path to csv file containing information about the reference genomes."
                 },
+                "anchors": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "^\\S+\\.csv$",
+                    "schema": "assets/anchors_schema.json",
+                    "description": "Path to csv file containing information about the anchors genomes."
+                },
                 "prot": {
                     "type": "string",
                     "format": "file-path",
@@ -50,7 +58,17 @@
                 },
                 "save_clean": {
                     "type": "boolean",
-                    "description": "Save clean fastq (after kraken2 removal).",
+                    "description": "Save clean fastq (after kraken2 removal / and bowtie2 anchor).",
+                    "default": false
+                },
+                "save_anchored": {
+                    "type": "boolean",
+                    "description": "Save anchored fastq (after bowtie2 anchor).",
+                    "default": false
+                },
+                "save_unclassed": {
+                    "type": "boolean",
+                    "description": "Save unclassed fastq (after kraken2 removal).",
                     "default": false
                 },
                 "save_aln": {
@@ -199,7 +217,7 @@
                     "type": "string",
                     "default": "--end-to-end",
                     "description": "Bowtie2 mapping args"
-                },
+                }
             }
         },
         "resources_options": {

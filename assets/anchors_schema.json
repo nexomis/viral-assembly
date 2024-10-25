@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/refs_schema.json",
-    "title": "Sample sheet format for --refs",
-    "description": "Reference genome IDs with paths",
+    "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/anchors_schema.json",
+    "title": "Sample sheet format for --anchors",
+    "description": "Anchor fasta file IDs with paths",
     "type": "array",
     "items": {
       "type": "object",

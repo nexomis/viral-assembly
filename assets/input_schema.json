@@ -40,6 +40,12 @@
           "description": "Id of the reference genome from --ref_genomes.",
           "default": ""
         },
+        "anchor": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_]*$", 
+          "description": "Id of the anchor to use from --anchors.",
+          "default": ""
+        },
         "class_dbs": {
           "pattern": "^[a-zA-Z0-9_]*(;[a-zA-Z0-9_]+)*$",
           "type": "string",

@@ -1,6 +1,6 @@
-id,R1,R2,ref_genome,ref_proteome,class_dbs,assembler,realign,do_abacas,dedup,keep_before_dedup
-s2,data/test/inputs/fq/s2.spring,,ref_2,sars2,k2_HPRC;k2_standard_08gb,spades_rnaviral,yes,yes,no,no
-s1,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,sars2,k2_HPRC,spades_rnaviral;spades_metaviral,yes,yes,no,no
-s1_no_kraken,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,,,spades_corona,yes,yes,yes,yes
-s1_no_realign,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,,,spades_corona,no,yes,no,no
-s1_no_ref,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,,,k2_HPRC,spades_corona,yes,yes,yes,no
+id,R1,R2,ref_genome,anchor,ref_proteome,class_dbs,assembler,realign,do_abacas,dedup,keep_before_dedup
+s2,data/test/inputs/fq/s2.spring,,ref_2,ref_2,sars2,k2_HPRC;k2_standard_08gb,spades_rnaviral,yes,yes,no,no
+s1,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,ref_1,sars2,k2_HPRC,spades_rnaviral;spades_metaviral,yes,yes,no,no
+s1_no_kraken,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,ref_1,,,spades_corona,yes,yes,yes,yes
+s1_no_realign,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,ref_1,ref_1,,,spades_corona,no,yes,no,no
+s1_no_ref,data/test/inputs/fq/SRR10903401_1.fastq.gz,data/test/inputs/fq/SRR10903401_2.fastq.gz,,,,k2_HPRC,spades_corona,yes,yes,yes,no
