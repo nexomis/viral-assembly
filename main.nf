@@ -1,34 +1,10 @@
 #!/usr/bin/env nextflow
+include {parseParam} from 'plugin/nf-schema'
+include {PRIMARY} from './modules/subworkflows/primary/main.nf'
+include {VIRAL_ASSEMBLY} from './modules/subworkflows/viral_assembly/main.nf'
 nextflow.preview.output = true
-include { validateParameters; paramsHelp; paramsSummaryLog; fromSamplesheet } from 'plugin/nf-validation'
-include { showSchemaHelp; extractType } from './modules/config/schema_helper.nf'
 
-log.info """
-    |            #################################################
-    |            #    _  _                             _         #
-    |            #   | \\| |  ___  __ __  ___   _ __   (_)  __    #
-    |            #   | .` | / -_) \\ \\ / / _ \\ | '  \\  | | (_-<   #
-    |            #   |_|\\_| \\___| /_\\_\\ \\___/ |_|_|_| |_| /__/   #
-    |            #                                               #
-    |            #################################################
-    |
-    | viral-assembly: Assemble viral genome and perform the associated QC. Starting from raw reads and one pre-built reference database in standard format (cf. README.md).
-    |
-    |""".stripMargin()
 
-if (params.help) {
-  log.info paramsHelp("nextflow run nexomis/viral-assembly --input </path/to/samplesheet> [args]")
-  log.info showSchemaHelp("assets/input_schema.json")
-  log.info showSchemaHelp("assets/class_dbs_schema.json")
-  log.info showSchemaHelp("assets/ref_genomes_schema.json")
-  log.info showSchemaHelp("assets/prot_schema.json")
-  log.info showSchemaHelp("assets/anchors_schema.json")
-  exit 0
-}
-validateParameters()
-log.info paramsSummaryLog(workflow)
-
-file(params.out_dir + "/nextflow").mkdirs()
 // groovy fonction within nextflow script
 def parse_sample_entry(it) {
   def type = "SR"
@@ -36,10 +12,9 @@ def parse_sample_entry(it) {
   if (it[2] && !it[2].isEmpty() ) {
     files << file(it[2])
     type = "PE"
-  } else {
-    if (it[1].toString().toLowerCase().endsWith("spring")) {
-      type = "spring"
-    }
+  }
+  if (it[1].toString().toLowerCase().endsWith("sfq")) {
+    type = "sfq"
   }
   def meta = [
     "id": it[0],
@@ -66,22 +41,18 @@ def parse_sample_entry(it) {
 
   return [meta, files]
 }
-  
-// include
-include {PRIMARY} from './modules/subworkflows/primary/main.nf'
-include {VIRAL_ASSEMBLY} from './modules/subworkflows/viral_assembly/main.nf'
 
 workflow {
-  // START PARSING SAMPLE SHEET
-  Channel.fromSamplesheet("input")
-  | map {
+  main:
+  Channel.fromList(parseParam("input"))
+  | map { it -> 
     return parse_sample_entry(it)
   }
   | set { readsInputs }
 
   if (params.class_dbs) {
-    Channel.fromSamplesheet("class_dbs")
-    | map { [["id": it[0]], it[1]] }
+    Channel.fromList(parseParam("class_dbs"))
+    | map { it ->  [["id": it[0]], it[1]] }
     | set {k2Inputs}
   } else {
     k2Inputs = Channel.empty()
@@ -89,24 +60,24 @@ workflow {
 
   
   if (params.ref_genomes) {
-    Channel.fromSamplesheet("ref_genomes")
-    | map { [["id": it[0]], it[1]] }
+    Channel.fromList(parseParam("ref_genomes"))
+    | map { it ->  [["id": it[0]], it[1]] }
     | set {refGenomeInputs}
   } else {
     refGenomeInputs = Channel.empty()
   }
 
   if (params.anchors) {
-    Channel.fromSamplesheet("anchors")
-    | map { [["id": it[0]], it[1]] }
+    Channel.fromList(parseParam("anchors"))
+    | map { it ->  [["id": it[0]], it[1]] }
     | set {anchorsInputs}
   } else {
     anchorsInputs = Channel.empty()
   }
 
   if (params.prot) {
-    Channel.fromSamplesheet("prot")
-    | map {[[id: it[0], regex_prot_name: it[2]], file(it[1])]}
+    Channel.fromList(parseParam("prot"))
+    | map { it -> [[id: it[0], regex_prot_name: it[2]], file(it[1])]}
     | set {protFasta}
   } else {
     protFasta = Channel.empty()
@@ -121,7 +92,7 @@ workflow {
     }
 
     Channel.fromPath(params.kraken2_db, type: "dir", checkIfExists: true)
-    | map {[["id": "kraken_db"], it]}
+    | map { it -> [["id": "kraken_db"], it]}
     | collect
     | set {dbPathKraken2}
 
@@ -133,46 +104,58 @@ workflow {
     PRIMARY.out.trimmed
     | set { trimmedInputs }
   }
-  // END PRIMARY
 
   VIRAL_ASSEMBLY(trimmedInputs, k2Inputs, refGenomeInputs, anchorsInputs, protFasta)
 
   publish:
-  PRIMARY.out.trimmed                         >> 'trimmed_and_filtered'
-  PRIMARY.out.fastqc_trim_html                >> 'fastqc_for_trimmed'
-  PRIMARY.out.fastqc_raw_html                 >> 'fastqc_for_raw'
-  PRIMARY.out.multiqc_html                    >> 'multiqc'
-  PRIMARY.out.kraken2_report                  >> 'classification'
-  PRIMARY.out.class_report                    >> 'classification'
-  VIRAL_ASSEMBLY.out.cleaned_reads            >> 'cleaned_reads'
-  VIRAL_ASSEMBLY.out.anchored_reads           >> 'anchored_reads'
-  VIRAL_ASSEMBLY.out.unclassed_reads          >> 'unclassed_reads'
-  VIRAL_ASSEMBLY.out.quast_dir                >> 'quast'
-  VIRAL_ASSEMBLY.out.all_scaffolds            >> 'all_scaffolds'
-  VIRAL_ASSEMBLY.out.all_aln                  >> 'all_aln'
-  VIRAL_ASSEMBLY.out.pre_abacas_scaffolds     >> 'pre_abacas'
-  VIRAL_ASSEMBLY.out.post_abacas_scaffolds    >> 'post_abacas'
-  VIRAL_ASSEMBLY.out.post_hannot_scaffolds    >> 'post_hannot'
-  VIRAL_ASSEMBLY.out.hannot_raw               >> 'hannot_raw'
-  VIRAL_ASSEMBLY.out.hannot_filtered          >> 'hannot_filtered'
+  all_aln = VIRAL_ASSEMBLY.out.all_aln
+  all_scaffolds = VIRAL_ASSEMBLY.out.all_scaffolds
+  anchored_reads = VIRAL_ASSEMBLY.out.anchored_reads
+  class_report = PRIMARY.out.class_report
+  cleaned_reads = VIRAL_ASSEMBLY.out.cleaned_reads
+  fastqc_for_raw = PRIMARY.out.fastqc_raw_html
+  fastqc_for_trimmed = PRIMARY.out.fastqc_trim_html
+  hannot_filtered = VIRAL_ASSEMBLY.out.hannot_filtered
+  hannot_raw = VIRAL_ASSEMBLY.out.hannot_raw
+  kraken2_report = PRIMARY.out.kraken2_report
+  multiqc = PRIMARY.out.multiqc_html
+  post_abacas_scaffolds = VIRAL_ASSEMBLY.out.post_abacas_scaffolds
+  post_hannot_scaffolds = VIRAL_ASSEMBLY.out.post_hannot_scaffolds
+  pre_abacas_scaffolds = VIRAL_ASSEMBLY.out.pre_abacas_scaffolds
+  quast_dir = VIRAL_ASSEMBLY.out.quast_dir
+  trimmed_and_filtered = PRIMARY.out.trimmed
+  unclassed_reads = VIRAL_ASSEMBLY.out.unclassed_reads
 }
 
 output {
-  directory "${params.out_dir}"
-  mode params.publish_dir_mode
-  'trimmed_and_filtered' {
-    enabled params.save_fastp
+  all_aln {
+    enabled params.save_aln
+    path "all_aln"
   }
-  'cleaned_reads' {
-    enabled params.save_clean
+  all_scaffolds {
+    path "all_scaffolds"
   }
-  'anchored_reads' {
+  anchored_reads {
     enabled params.save_anchored
   }
-  'unclassed_reads' {
-    enabled params.save_unclassed
+  class_report {}
+  cleaned_reads {
+    enabled params.save_clean
   }
-  'all_aln' {
-    enabled params.save_aln
+  fastqc_for_raw {}
+  fastqc_for_trimmed {}
+  hannot_filtered {}
+  hannot_raw {}
+  kraken2_report {}
+  multiqc {}
+  post_abacas_scaffolds {}
+  post_hannot_scaffolds {}
+  pre_abacas_scaffolds {}
+  quast_dir {}
+  trimmed_and_filtered {
+    enabled params.save_fastp
+  }
+  unclassed_reads {
+    enabled params.save_unclassed
   }
 }
