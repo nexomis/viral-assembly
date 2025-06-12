@@ -130,32 +130,58 @@ workflow {
 output {
   all_aln {
     enabled params.save_aln
-    path "all_aln"
+    path "alignment/alignments"
   }
   all_scaffolds {
-    path "all_scaffolds"
+    path "assembly/scaffolds"
   }
   anchored_reads {
     enabled params.save_anchored
+    path "filtering/anchored_reads"
   }
-  class_report {}
+  class_report {
+    path "primary/classification"
+  }
   cleaned_reads {
     enabled params.save_clean
+    path "filtering/cleaned_reads"
   }
-  fastqc_for_raw {}
-  fastqc_for_trimmed {}
-  hannot_filtered {}
-  hannot_raw {}
-  kraken2_report {}
-  multiqc {}
-  post_abacas_scaffolds {}
-  post_hannot_scaffolds {}
-  pre_abacas_scaffolds {}
-  quast_dir {}
+  fastqc_for_raw {
+    path "primary/qc/fastqc/raw"
+  }
+  fastqc_for_trimmed {
+    path "primary/qc/fastqc/trimmed"
+  }
+  hannot_filtered {
+    path "assembly/annotation/hannot_filtered"
+  }
+  hannot_raw {
+    path "assembly/annotation/hannot_raw"
+  }
+  kraken2_report {
+    path "primary/classification/"
+  }
+  multiqc {
+    path "primary/"
+  }
+  post_abacas_scaffolds {
+    path "assembly/post_abacas_scaffolds"
+  }
+  post_hannot_scaffolds {
+    path "assembly/post_hannot_scaffolds"
+  }
+  pre_abacas_scaffolds {
+    path "assembly/pre_abacas_scaffolds"
+  }
+  quast_dir {
+    path "assembly/quast"
+  }
   trimmed_and_filtered {
     enabled params.save_fastp
+    path "primary/trimmed_reads"
   }
   unclassed_reads {
     enabled params.save_unclassed
+    path "filtering/unclassed_reads"
   }
 }
