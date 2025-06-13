@@ -1,5 +1,15 @@
 #!/bin/bash
 
-NXF_PLUGINS_TEST_REPOSITORY=https://github.com/jfouret/nf-schema/releases/download/2.4.2-dev/nf-schema-2.4.2-dev-meta.json nextflow plugin install nf-schema@2.4.2-dev
-NXF_PLUGINS_TEST_REPOSITORY=https://github.com/nexomis/nf-nexomis/releases/download/0.1.0/nf-schema-0.1.0-meta.json nextflow plugin install nf-nexomis@0.1.0
+cd $NXF_HOME/plugins
 
+for plugin in jfouret/nf-schema@2.4.2-dev nexomis/nf-nexomis@0.1.0; do
+    repo=$(echo $plugin | cut -d'@' -f1)
+    org=$(echo $repository | cut -d'/' -f1)
+    name=$(echo $repository | cut -d'/' -f2)
+    ver=$(echo $plugin | cut -d'@' -f2)
+    rm -rf $plugin
+    wget https://github.com/${org}/${name}/releases/download/${ver}/${name}-${ver}.zip
+    unzip ${name}-${ver}.zip -d ${name}-${ver}
+    rm ${name}-${ver}.zip
+    rm -rf $plugin
+done
