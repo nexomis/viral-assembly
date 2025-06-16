@@ -15,3 +15,10 @@ note.txt
 /package*
 /*.pileup
 sars2_proteome.fa
+/tmp
+
+/report-*
+/dag-*
+/timeline-*
+/trace-*
+/pipeline_info

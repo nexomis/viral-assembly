@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/input_schema.json",
     "title": "Sample sheet format for --input",
     "description": "Sample ids with reads paths and metadata",
@@ -15,7 +15,7 @@
         },
         "R1": {
           "type": "string",
-          "pattern": "^\\S+\\.(fastq|fq|spring)(\\.)?(gz|z|)?$",
+          "pattern": "^\\S+\\.(fastq|fq|sfq)(\\.)?(gz|z|)?$",
           "format": "file-path",
           "description": "Path for R1 reads with (.fastq, .fq), can be gziped. Spring files accepted."
         },
@@ -24,7 +24,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^\\S+\\.(fastq|fq)(\\.)?(gz|z|gzip)?$",
+              "pattern": "^\\S+\\.(fastq|fq|sfq)(\\.)?(gz|z|gzip)?$",
               "format": "file-path"
             },
             {

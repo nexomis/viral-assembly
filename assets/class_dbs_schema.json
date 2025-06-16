@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nexomis/rna-preprocessing/main/assets/kraken2_db_schema.json",
     "title": "Sample sheet format for --class_dbs",
     "description": "Classification databases IDs with paths",
@@ -15,8 +15,9 @@
         },
         "path": {
           "type": "string",
-          "format": "dir-path",
-          "description": "Path for kraken2 database as a directory"
+          "format": "path",
+          "description": "Path for kraken2 database as a directory",
+          "exist": true
         }
       },
       "required": ["id", "path"]

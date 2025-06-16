@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nexomis/viral-assembly/main/assets/prot_schema.json",
     "title": "Sample sheet format for --prot",
     "description": "Proteome to be used for assembly",
