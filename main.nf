@@ -109,6 +109,7 @@ workflow {
 
   publish:
   all_aln = VIRAL_ASSEMBLY.out.all_aln
+  ref_aln = VIRAL_ASSEMBLY.out.ref_mapped_bam
   all_scaffolds = VIRAL_ASSEMBLY.out.all_scaffolds
   anchored_reads = VIRAL_ASSEMBLY.out.anchored_reads
   class_report = PRIMARY.out.class_report
@@ -130,7 +131,11 @@ workflow {
 output {
   all_aln {
     enabled params.save_aln
-    path "alignment/alignments"
+    path "mapping/vs_assemblies"
+  }
+  ref_aln {
+    enabled params.save_aln
+    path "mapping/vs_ref"
   }
   all_scaffolds {
     path "assembly/scaffolds"
