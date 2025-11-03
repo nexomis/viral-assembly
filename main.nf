@@ -1,9 +1,8 @@
 #!/usr/bin/env nextflow
-include {parseParam} from 'plugin/nf-schema'
+include {samplesheetToList; validateParameters} from 'plugin/nf-schema'
 include {PRIMARY} from './modules/subworkflows/primary/main.nf'
 include {VIRAL_ASSEMBLY} from './modules/subworkflows/viral_assembly/main.nf'
 nextflow.preview.output = true
-
 
 // groovy fonction within nextflow script
 def parse_sample_entry(it) {
@@ -44,14 +43,15 @@ def parse_sample_entry(it) {
 
 workflow {
   main:
-  Channel.fromList(parseParam("input"))
+  validateParameters()
+  Channel.fromList(samplesheetToList(params.input, "assets/input_schema.json"))
   | map { it -> 
     return parse_sample_entry(it)
   }
   | set { readsInputs }
 
   if (params.class_dbs) {
-    Channel.fromList(parseParam("class_dbs"))
+    Channel.fromList(samplesheetToList(params.class_dbs, "assets/class_dbs_schema.json"))
     | map { it ->  [["id": it[0]], it[1]] }
     | set {k2Inputs}
   } else {
@@ -60,7 +60,7 @@ workflow {
 
   
   if (params.ref_genomes) {
-    Channel.fromList(parseParam("ref_genomes"))
+    Channel.fromList(samplesheetToList(params.ref_genomes, "assets/ref_genomes_schema.json"))
     | map { it ->  [["id": it[0]], it[1]] }
     | set {refGenomeInputs}
   } else {
@@ -68,7 +68,7 @@ workflow {
   }
 
   if (params.anchors) {
-    Channel.fromList(parseParam("anchors"))
+    Channel.fromList(samplesheetToList(params.anchors, "assets/anchors_schema.json"))
     | map { it ->  [["id": it[0]], it[1]] }
     | set {anchorsInputs}
   } else {
@@ -76,7 +76,7 @@ workflow {
   }
 
   if (params.prot) {
-    Channel.fromList(parseParam("prot"))
+    Channel.fromList(samplesheetToList(params.prot, "assets/prot_schema.json"))
     | map { it -> [[id: it[0], regex_prot_name: it[2]], file(it[1])]}
     | set {protFasta}
   } else {
